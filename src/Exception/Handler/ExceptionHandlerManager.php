@@ -2,6 +2,8 @@
 
 namespace Swoft\Exception\Handler;
 
+use Swoft\App;
+
 /**
  * exception handler manager
  *
@@ -43,6 +45,7 @@ class ExceptionHandlerManager
      */
     public static function handle(\Throwable $throwable)
     {
+        self::printException($throwable);
         $response = null;
         $queue = clone self::getQueue();
         while ($queue->valid()) {
@@ -77,11 +80,26 @@ class ExceptionHandlerManager
      */
     protected static function initQueue()
     {
-        if (! self::$queue instanceof \SplPriorityQueue) {
+        if (!self::$queue instanceof \SplPriorityQueue) {
             self::$queue = new \SplPriorityQueue();
             foreach (self::$defaultExceptionHandlers as $handler => $priority) {
                 self::$queue->insert($handler, $priority);
             }
+        }
+    }
+
+    /**
+     * Print the exception when DISPLAY_ERRORS is true
+     * @param \Throwable $throwable
+     */
+    private static function printException(\Throwable $throwable)
+    {
+        if (App::isWorkerStatus() && env('DISPLAY_ERRORS', false)) {
+            $className = get_class($throwable);
+            printf(str_repeat('-',
+                    strlen($className) + 9) . PHP_EOL . 'Catch an %s' . PHP_EOL . 'Message: %s' . PHP_EOL . 'Code: %s' . PHP_EOL . 'File: %s (#%s)' . PHP_EOL,
+                $className, $throwable->getMessage(), $throwable->getCode(), $throwable->getFile(),
+                $throwable->getLine());
         }
     }
 

@@ -5,6 +5,7 @@ namespace Swoft\Web;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Swoft\Web\Cookie\Cookie;
 
 /**
  * @uses      Psr7Request
@@ -243,6 +244,17 @@ class Psr7Request implements RequestInterface
         }
         // Ensure Host is the first header.
         $this->headers = [$header => [$host]] + $this->headers;
+    }
+
+    /**
+     * Sets a cookie.
+     *
+     * @param Cookie $cookie
+     */
+    public function withCookie(Cookie $cookie)
+    {
+        $cookies[$cookie->getDomain()][$cookie->getPath()][$cookie->getName()] = $cookie;
+        $this->headerNames['set-cookie'] = 'Set-Cookie';
     }
 
 }

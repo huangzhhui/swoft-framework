@@ -389,4 +389,12 @@ class Response extends \Swoft\Base\Response
         return in_array($this->statusCode, array(204, 304));
     }
 
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getBody()->getContents();
+    }
+
 }
